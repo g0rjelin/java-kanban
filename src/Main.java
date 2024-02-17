@@ -1,4 +1,8 @@
 import taskmanager.*;
+import taskmodel.Epic;
+import taskmodel.Subtask;
+import taskmodel.Task;
+import taskmodel.TaskStatus;
 
 public class Main {
 
@@ -8,12 +12,11 @@ public class Main {
         Task task1 = new Task("Первая задача", "Пример запланированной задачи");
         Task task2 = new Task("Вторая задача", "Пример задачи в работе", TaskStatus.IN_PROGRESS);
         Epic epic1 = new Epic("Первый эпик", "Первое эпичное описание");
-        Subtask subtask1 = new Subtask("Первая подзадачка", "Запланированная подзадача", TaskStatus.DONE, epic1);
-        Subtask subtask2 = new Subtask("Вторая подзадачка", "Подзадача в работе", epic1);
-        taskManager.addTask(null);
         taskManager.addTask(task1);
         taskManager.addTask(task2);
         taskManager.addEpic(epic1);
+        Subtask subtask1 = new Subtask("Первая подзадачка", "Запланированная подзадача", TaskStatus.DONE, epic1.getId());
+        Subtask subtask2 = new Subtask("Вторая подзадачка", "Подзадача в работе", epic1.getId());
         taskManager.addSubtask(subtask1);
         taskManager.addSubtask(subtask2);
         System.out.println(taskManager.getTasksList());
@@ -22,9 +25,9 @@ public class Main {
 
         System.out.println();
         System.out.println("Изменения #1:");
-        Task updateTask1 = new Task(task1.getName(), task1.getDescription(), task1.getId(), TaskStatus.DONE);
+        Task updateTask1 = new Task( task1.getId(), task1.getName(), task1.getDescription(), TaskStatus.DONE);
 
-        Subtask updateSubtask2 = new Subtask(subtask2.getName(), subtask2.getDescription(), subtask2.getId(), TaskStatus.DONE, subtask2.getEpic());
+        Subtask updateSubtask2 = new Subtask(subtask2.getId(), subtask2.getName(), subtask2.getDescription(), TaskStatus.DONE, subtask2.getIdEpic());
         System.out.println(taskManager.updateTask(updateTask1));
         System.out.println(taskManager.updateSubtask(updateSubtask2));
 
@@ -38,8 +41,8 @@ public class Main {
 
         System.out.println();
         System.out.println("Изменения #2:");
-        System.out.println(taskManager.deleteTaskById(task1.getId()));
-        System.out.println(taskManager.deleteEpicById(epic1.getId()));
+        taskManager.deleteTaskById(task1.getId());
+        taskManager.deleteEpicById(epic1.getId());
 
         System.out.println();
         System.out.println("После изменений #2:");

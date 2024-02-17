@@ -1,28 +1,28 @@
-package taskmanager;
+package taskmodel;
 
 public class Subtask extends Task{
-    Epic epic;
+    private Integer idEpic;
 
     /**конструктор для подзадачи, уже заведенной в менеджер (обновление, удаление)*/
-    public Subtask(String name, String description, Integer id, TaskStatus status, Epic epic) {
-        super(name, description, id, status);
-        this.epic = epic;
+    public Subtask(Integer id, String name, String description, TaskStatus status, Integer idEpic) {
+        super(id, name, description, status);
+        this.idEpic = idEpic;
     }
 
     /**конструктор для новой задачи при создании с указанием статуса*/
-    public Subtask(String name, String description, TaskStatus status, Epic epic) {
+    public Subtask(String name, String description, TaskStatus status, Integer idEpic) {
         super(name, description, status);
-        this.epic = epic;
+        this.idEpic = idEpic;
     }
 
     /**конструктор для новой подзадачи при создании без указания статуса*/
-    public Subtask(String name, String description, Epic epic) {
+    public Subtask(String name, String description, Integer idEpic) {
         super(name, description);
-        this.epic = epic;
+        this.idEpic = idEpic;
     }
 
-    public Epic getEpic() {
-        return epic;
+    public Integer getIdEpic() {
+        return idEpic;
     }
 
     @Override
@@ -32,7 +32,7 @@ public class Subtask extends Task{
                 ", description='" + getDescription() + '\'' +
                 ", id=" + getId() +
                 ", status=" + getStatus() +
-                ", epic='" + epic.getName() + '\'' +
+                ", idEpic=" + idEpic +
                 '}';
     }
 }

@@ -1,10 +1,15 @@
 package taskmanager;
 
+import taskmodel.Epic;
+import taskmodel.Subtask;
+import taskmodel.Task;
+import taskmodel.TaskStatus;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class TaskManager {
-    public static int idSeq = 0; //счетчик задач в менеджере
+    private int idSeq = 0; //счетчик задач в менеджере
 
     HashMap<Integer, Task> tasks;
     HashMap<Integer, Epic> epics;
@@ -17,265 +22,139 @@ public class TaskManager {
     }
 
     /**генерация id менеджером*/
-    public static int getIdSeq() {
+    int getIdSeq() {
         return idSeq++;
     }
 
     /**получение списка задач*/
     public ArrayList<Task> getTasksList() {
-        ArrayList<Task> tasksList = new ArrayList<>();
-        for (Integer idTask : tasks.keySet()) {
-            tasksList.add(tasks.get(idTask));
-        }
-        return tasksList;
+        return new ArrayList<>(tasks.values());
     }
 
     /**получение списка эпиков*/
     public ArrayList<Epic> getEpicsList() {
-        ArrayList<Epic> epicsList = new ArrayList<>();
-        for (Integer idEpic : epics.keySet()) {
-            epicsList.add(epics.get(idEpic));
-        }
-        return epicsList;
+        return new ArrayList<>(epics.values());
     }
 
     /**получение списка подзадач*/
     public ArrayList<Subtask> getSubtasksList() {
-        ArrayList<Subtask> subtasksList = new ArrayList<>();
-        for (Integer idSubtask : subtasks.keySet()) {
-            subtasksList.add(subtasks.get(idSubtask));
-        }
-        return subtasksList;
+        return new ArrayList<>(subtasks.values());
     }
 
     /**удаление всех задач*/
     public void removeAllTasks() {
-        if (!tasks.isEmpty()) {
-            for (Integer idTask : tasks.keySet()) {
-                tasks.remove(idTask);
-            }
-            System.out.println("Все задачи удалены из менеджера");
-        }
+        tasks.clear();
     }
 
     /**удаление всех эпиков*/
     public void removeAllEpics() {
-        if (!epics.isEmpty()) {
-            for (Integer idEpic : epics.keySet()) {
-                epics.remove(idEpic);
-            }
-            System.out.println("Все эпики удалены из менеджера");
-        }
+        epics.clear();
+        subtasks.clear();
     }
 
     /**удаление всех подзадач*/
     public void removeAllSubtasks() {
         if (!subtasks.isEmpty()) {
-            for (Integer idSubtask : subtasks.keySet()) {
-                subtasks.remove(idSubtask);
-            }
-            for (Integer idEpic : epics.keySet()) {
-                epics.get(idEpic).subtasksList = new ArrayList<>();
-            }
-            System.out.println("Все подзадачи удалены из менеджера");
+            subtasks.clear();
+        }
+        for (Epic epic: epics.values()) {
+            epic.setStatus(TaskStatus.NEW);
+            epic.getSubtaskIdList().clear();
         }
     }
 
     /**получение задачи по идентификатору*/
     public Task getTaskById(Integer id) {
-        if (tasks.isEmpty()) {
-            System.out.println("В менеджере отсутствуют задачи.");
-            return null;
-        }
-        for (Integer idTask : tasks.keySet()) {
-            if (tasks.get(idTask).getId() == id) {
-                return tasks.get(idTask);
-            }
-        }
-        System.out.println("Задача с идентификатором " + id + " не найдена в менеджере.");
-        return null;
+        return tasks.get(id);
     }
 
     /**получение эпика по идентификатору*/
     public Epic getEpicById(Integer id) {
-        if (epics.isEmpty()) {
-            System.out.println("В менеджере отсутствуют эпики.");
-            return null;
-        }
-        for (Integer idEpic : epics.keySet()) {
-            if (epics.get(idEpic).getId() == id) {
-                return epics.get(idEpic);
-            }
-        }
-        System.out.println("Эпик с идентификатором " + id + " не найден в менеджере.");
-        return null;
+        return epics.get(id);
     }
 
     /**получение подзадачи по идентификатору*/
     public Subtask getSubtaskById(Integer id) {
-        if (subtasks.isEmpty()) {
-            System.out.println("В менеджере отсутствуют подзадачи.");
-            return null;
-        }
-        for (Integer idSubtask : subtasks.keySet()) {
-            if (subtasks.get(idSubtask).getId() == id) {
-                return subtasks.get(idSubtask);
-            }
-        }
-        System.out.println("Подзадача с идентификатором " + id + " не найдена в менеджере.");
-        return null;
+        return subtasks.get(id);
     }
 
     /**создание задачи*/
     public Task addTask(Task newTask) {
-        if (newTask != null) {
-            for (Task task : tasks.values()) {
-                if (task.equals(newTask)) {
-                    System.out.println("Задача с идентификатором " + newTask.getId() + " уже есть в менеджере.");
-                    return null;
-                }
-            }
-            newTask.setId(getIdSeq()); //задание id задачи при ее добавлении в менеджер
-            tasks.put(newTask.getId(), newTask);
-            System.out.println("Задача добавлена в менеджер с идентификатором " + newTask.getId() + ".");
-            return newTask;
-        } else {
-            return null;
-        }
+        newTask.setId(getIdSeq());
+        tasks.put(newTask.getId(), newTask);
+        return newTask;
     }
 
-    /**создание задачи*/
+    /**создание эпика*/
     public Epic addEpic(Epic newEpic) {
-        if (newEpic != null) {
-            for (Epic epic : epics.values()) {
-                if (epic.equals(newEpic)) {
-                    System.out.println("Эпик с идентификатором " + newEpic.getId() + " уже есть в менеджере.");
-                    return null;
-                }
-            }
-            newEpic.setId(getIdSeq()); //задание id эпика при его добавлении в менеджер
-            epics.put(newEpic.getId(), newEpic);
-            System.out.println("Эпик добавлен в менеджер с идентификатором " + newEpic.getId() + ".");
-            return newEpic;
-        } else {
-            return null;
-        }
+        newEpic.setId(getIdSeq());
+        epics.put(newEpic.getId(), newEpic);
+        return newEpic;
     }
 
     /**создание подзадачи*/
     public Subtask addSubtask(Subtask newSubtask) {
-        if (newSubtask != null) {
-            for (Subtask subtask : subtasks.values()) {
-                if (subtask.equals(newSubtask)) {
-                    System.out.println("Подзадача с идентификатором " + newSubtask.getId() + " уже есть в менеджере.");
-                    return null;
-                }
-            }
-            newSubtask.setId(getIdSeq()); //задание id подзадачи при ее добавлении в менеджер
+        if (epics.containsKey(newSubtask.getIdEpic())) {
+            newSubtask.setId(getIdSeq());
             subtasks.put(newSubtask.getId(), newSubtask);
-            newSubtask.epic.subtasksList = getSubtasksListByEpic(newSubtask.epic);
-            newSubtask.epic.updateStatus(); //проверка статуса эпика после добавления подзадачи
-            System.out.println("Подзадача добавлена в менеджер с идентификатором " + newSubtask.getId() + ".");
-            return newSubtask;
-        } else {
-            return null;
+            Epic epicFromSubtask = getEpicById(newSubtask.getIdEpic());
+            epicFromSubtask.getSubtaskIdList().add(newSubtask.getId());
+            updateEpicStatus(epicFromSubtask);
         }
+        return newSubtask;
     }
 
     /**обновление задачи*/
     public Task updateTask(Task updTask) {
-        if (updTask != null) {
-            for (Task task : tasks.values()) {
-                if (task.equals(updTask)) {
-                    tasks.put(updTask.getId(), updTask);
-                    System.out.println("Задача с идентификатором " + updTask.getId() + " обновлена в менеджере.");
-                    return updTask;
-                }
-            }
-            System.out.println("Задача с идентификатором " + updTask.getId() + " не найдена в менеджере.");
-            return updTask;
-        } else {
-            return null;
+        if (tasks.containsKey(updTask.getId())) {
+            tasks.put(updTask.getId(),updTask);
         }
+        return updTask;
     }
 
     /**обновление эпика*/
     public Epic updateEpic(Epic updEpic) {
-        if (updEpic != null) {
-            for (Epic epic : epics.values()) {
-                if (epic.equals(updEpic)) {
-                    epics.put(updEpic.getId(), updEpic);
-                    System.out.println("Эпик с идентификатором " + updEpic.getId() + " обновлен в менеджере.");
-                    return updEpic;
-                }
-            }
-            System.out.println("Эпик с идентификатором " + updEpic.getId() + " не найден в менеджере.");
-            return updEpic;
-        } else {
-            return null;
+        if (epics.containsKey(updEpic.getId())) {
+            epics.put(updEpic.getId(),updEpic);
+            updateEpicStatus(updEpic);
         }
+        return updEpic;
     }
 
     /**обновление подзадачи*/
     public Subtask updateSubtask(Subtask updSubtask) {
-        if (updSubtask != null) {
-            for (Subtask subtask : subtasks.values()) {
-                if (subtask.equals(updSubtask)) {
-                    subtasks.put(updSubtask.getId(), updSubtask);
-                    updSubtask.epic.subtasksList = getSubtasksListByEpic(updSubtask.epic);
-                    updSubtask.epic.updateStatus(); //проверка статуса эпика после обновления подзадачи
-                    System.out.println("Подзадача с идентификатором " + updSubtask.getId() + " обновлена в менеджере.");
-                    return updSubtask;
-                }
-            }
-            System.out.println("Подзадача с идентификатором " + updSubtask.getId() + " не найдена в менеджере.");
-            return updSubtask;
-        } else {
-            return null;
+        if (subtasks.containsKey(updSubtask.getId())) {
+            subtasks.put(updSubtask.getId(),updSubtask);
+            updateEpicStatus(getEpicById(updSubtask.getIdEpic()));
         }
+        return updSubtask;
     }
 
     /**удаление задачи*/
-    public Task deleteTaskById(Integer id) {
-        if (tasks.containsKey(id)) {
-            System.out.println("Задача с идентификатором " + id + " удалена из менеджера.");
-            return tasks.remove(id);
-        } else {
-            System.out.println("Задача с идентификатором " + id + " не найдена в менеджере.");
-            return null;
-        }
+    public void deleteTaskById(Integer id) {
+            tasks.remove(id);
     }
 
     /**удаление эпика*/
-    public Epic deleteEpicById(Integer id) {
+    public void deleteEpicById(Integer id) {
         if (epics.containsKey(id)) {
-            Epic deletedEpic = epics.remove(id);
-            System.out.println("Эпик с идентификатором " + id + " удален из менеджера.");
-            if (!deletedEpic.subtasksList.isEmpty()) {
-                System.out.println("Удаление связанных подзадач:");
-                for (Subtask subtask : deletedEpic.subtasksList) {
+            //удаление связанных с эпиком подзадач
+            if (!getEpicById(id).getSubtaskIdList().isEmpty()) {
+                for (Subtask subtask : getSubtasksListByEpic(getEpicById(id)) ) {
                     deleteSubtaskById(subtask.getId());
                 }
             }
-            return deletedEpic;
-        } else {
-            System.out.println("Эпик с идентификатором " + id + " не найден в менеджере.");
-            return null;
+            epics.remove(id);
         }
     }
 
     /**удаление подзадачи*/
-    public Subtask deleteSubtaskById(Integer id) {
+    public void deleteSubtaskById(Integer id) {
         if (subtasks.containsKey(id)) {
             Subtask deletedSubtask = subtasks.remove(id);
-            Epic epicOfRemovedSubtask = deletedSubtask.epic; //эпик удаляемой подзадачи
-            epicOfRemovedSubtask.subtasksList = getSubtasksListByEpic(epicOfRemovedSubtask);
-            epicOfRemovedSubtask.updateStatus(); //проверка статуса эпика после удаления подзадачи
-            System.out.println("Подзадача с идентификатором " + id + " удалена из менеджера.");
-            return deletedSubtask;
-        } else {
-            System.out.println("Подзадача с идентификатором " + id + " не найдена в менеджере.");
-            return null;
+            Epic epicOfRemovedSubtask = getEpicById(deletedSubtask.getIdEpic()); //эпик удаляемой подзадачи
+            epicOfRemovedSubtask.getSubtaskIdList().remove(id); //удаление id подзадачи из списка в эпике
+            updateEpicStatus(epicOfRemovedSubtask); //проверка статуса эпика после удаления подзадачи
         }
     }
 
@@ -284,13 +163,29 @@ public class TaskManager {
         if (subtasks.isEmpty()) {
             return new ArrayList<>();
         }
-        ArrayList<Subtask> subtaskList = new ArrayList<>();
-        for (Integer idSubtask : subtasks.keySet()) {
-            if (subtasks.get(idSubtask).epic.equals(epic)) {
-                subtaskList.add(subtasks.get(idSubtask));
-            }
+        ArrayList<Subtask> subtasksList = new ArrayList<>();
+        for (Integer idSubtask: epic.getSubtaskIdList()) {
+            subtasksList.add(getSubtaskById(idSubtask));
         }
-        return subtaskList;
+        return subtasksList;
+    }
+
+    /**обновление статуса эпика*/
+    private void updateEpicStatus(Epic epic) {
+        if (epic.getSubtaskIdList().isEmpty()) {
+            epic.setStatus(TaskStatus.NEW);
+        } else {
+            ArrayList<Subtask> subtasksList = getSubtasksListByEpic(epic);
+            //проверяем все статусы подзадач (сначала 0, а потом с 1й в цикле)
+            TaskStatus currentSubTaskStatus = subtasksList.get(0).getStatus();
+            for (int i = 1; i < subtasksList.size(); i++) {
+                if (subtasksList.get(i).getStatus() != currentSubTaskStatus) { //если статус хотя бы одной подзадачи отличается от других, то эпик в работе
+                    currentSubTaskStatus = TaskStatus.IN_PROGRESS;
+                    break;
+                }
+            }
+            epic.setStatus(currentSubTaskStatus);
+        }
     }
 
 }
