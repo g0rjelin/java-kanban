@@ -21,8 +21,16 @@ public class Epic extends Task{
         return subtaskIdList;
     }
 
-    public void setSubtaskIdList(ArrayList<Integer> subtaskIdList) {
-        this.subtaskIdList = subtaskIdList;
+    public void clearSubtaskIdList() {
+        subtaskIdList.clear();
+    }
+
+    public void addIdSubtask(Integer idSubtask) {
+        subtaskIdList.add(idSubtask);
+    }
+
+    public void deleteIdSubtask(Integer idSubtask) {
+        subtaskIdList.remove(idSubtask);
     }
 
     @Override
