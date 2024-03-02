@@ -8,7 +8,7 @@ public class Epic extends Task{
     /**конструктор для эпика, уже заведенного в менеджер (обновление, удаление)*/
     public Epic(Integer id, String name, String description, ArrayList<Integer> subtaskIdList) {
         super(id, name, description);
-        this.subtaskIdList = subtaskIdList;
+        this.subtaskIdList = new ArrayList<>(subtaskIdList);
     }
 
     /**конструктор для нового эпика*/
