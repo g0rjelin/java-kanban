@@ -9,8 +9,6 @@ import java.util.List;
 
 public interface TaskManager {
 
-    int getIdSeq();
-
     ArrayList<Task> getTasksList();
 
     ArrayList<Epic> getEpicsList();

@@ -25,8 +25,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     /**генерация id менеджером*/
-    @Override
-    public int getIdSeq() {
+    private int getIdSeq() {
         return ++idSeq;
     }
 
@@ -52,6 +51,12 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public HistoryManager getHistoryManager() {
         return historyManager;
+    }
+
+    /**получение истории*/
+    @Override
+    public List<Task> getHistory() {
+        return historyManager.getHistory();
     }
 
     /**получение истории*/
