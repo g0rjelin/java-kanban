@@ -62,19 +62,23 @@ public class InMemoryTaskManager implements TaskManager {
     /**удаление всех задач*/
     @Override
     public void removeAllTasks() {
+        for (Integer taskId: tasks.keySet()) historyManager.remove(taskId);
         tasks.clear();
     }
 
     /**удаление всех эпиков*/
     @Override
     public void removeAllEpics() {
+        for (Integer epicId: epics.keySet()) historyManager.remove(epicId);
         epics.clear();
+        for (Integer subtaskId: subtasks.keySet()) historyManager.remove(subtaskId);
         subtasks.clear();
     }
 
     /**удаление всех подзадач*/
     @Override
     public void removeAllSubtasks() {
+        for (Integer subtaskId: subtasks.keySet()) historyManager.remove(subtaskId);
         subtasks.clear();
         for (Epic epic: epics.values()) {
             epic.setStatus(TaskStatus.NEW);
@@ -128,7 +132,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (epics.containsKey(newSubtask.getIdEpic())) {
             newSubtask.setId(getIdSeq());
             subtasks.put(newSubtask.getId(), newSubtask);
-            Epic epicFromSubtask = getEpicById(newSubtask.getIdEpic());
+            Epic epicFromSubtask = epics.get(newSubtask.getIdEpic());
             epicFromSubtask.addIdSubtask(newSubtask.getId());
             updateEpicStatus(epicFromSubtask);
         }
@@ -159,7 +163,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Integer updateSubtask(Subtask updSubtask) {
         if (subtasks.containsKey(updSubtask.getId())) {
             subtasks.put(updSubtask.getId(),updSubtask);
-            updateEpicStatus(getEpicById(updSubtask.getIdEpic()));
+            updateEpicStatus(epics.get(updSubtask.getIdEpic()));
         }
         return updSubtask.getId();
     }
@@ -167,7 +171,8 @@ public class InMemoryTaskManager implements TaskManager {
     /**удаление задачи*/
     @Override
     public void deleteTaskById(Integer id) {
-            tasks.remove(id);
+        tasks.remove(id);
+        historyManager.remove(id);
     }
 
     /**удаление эпика*/
@@ -177,9 +182,11 @@ public class InMemoryTaskManager implements TaskManager {
         if (deletedEpic == null) { //если объект не существовал - выходим из метода
             return;
         }
+        historyManager.remove(id);
         //удаление связанных с эпиком подзадач
-        for(Integer subtaskId : deletedEpic.getSubtaskIdList()) {
+        for (Integer subtaskId : deletedEpic.getSubtaskIdList()) {
             subtasks.remove(subtaskId);
+            historyManager.remove(subtaskId);
         }
     }
 
@@ -188,9 +195,11 @@ public class InMemoryTaskManager implements TaskManager {
     public void deleteSubtaskById(Integer id) {
         if (subtasks.containsKey(id)) {
             Subtask deletedSubtask = subtasks.remove(id);
-            Epic epicOfRemovedSubtask = getEpicById(deletedSubtask.getIdEpic()); //эпик удаляемой подзадачи
+            historyManager.remove(id);
+            Epic epicOfRemovedSubtask = epics.get(deletedSubtask.getIdEpic()); //эпик удаляемой подзадачи
             epicOfRemovedSubtask.deleteIdSubtask(id);
             updateEpicStatus(epicOfRemovedSubtask); //проверка статуса эпика после удаления подзадачи
+            deletedSubtask.setId(0); //Удаляемые подзадачи не должны хранить внутри себя старые id
         }
     }
 
