@@ -20,4 +20,5 @@ public class EpicTest {
         Assertions.assertEquals(epicOneWithId1, epicTwoWithId1, "Экземпляры класса Epic равны друг другу, если равен их id");
         Assertions.assertNotEquals(epicOneWithId1, epicThreeWithId2, "Экземпляры Epic с разным id не должны быть равны");
     }
+
 }

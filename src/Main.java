@@ -7,50 +7,80 @@ import taskmodel.TaskStatus;
 public class Main {
 
     public static void main(String[] args) {
+        //Реализация пользовательского сценария
         TaskManager taskManager = Managers.getDefault();
 
-        Task task1 = new Task("Первая задача", "Пример запланированной задачи");
-        Task task2 = new Task("Вторая задача", "Пример задачи в работе", TaskStatus.IN_PROGRESS);
-        Epic epic1 = new Epic("Первый эпик", "Первое эпичное описание");
-        System.out.println("Добавлена задача с id = " + taskManager.addTask(task1));
-        System.out.println("Добавлена задача с id = " + taskManager.addTask(task2));
-        System.out.println("Добавлен эпик с id = " + taskManager.addEpic(epic1));
-        Subtask subtask1 = new Subtask("Первая подзадачка", "Запланированная подзадача", TaskStatus.DONE, epic1.getId());
-        Subtask subtask2 = new Subtask("Вторая подзадачка", "Подзадача в работе", epic1.getId());
-        System.out.println("Добавлена подзадача с id = " + taskManager.addSubtask(subtask1));
-        System.out.println("Добавлена подзадача с id = " + taskManager.addSubtask(subtask2));
-        System.out.println(taskManager.getTasksList());
-        System.out.println(taskManager.getEpicsList());
-        System.out.println(taskManager.getSubtasksList());
+        userScenarioSample(taskManager);
 
-        System.out.println(taskManager.getTaskById(task1.getId()));
-        System.out.println(taskManager.getTaskById(task2.getId()));
-
-        printAllTasks(taskManager);
     }
 
-    /**сценарий для проверки не через тесты*/
-    private static void printAllTasks(TaskManager manager) {
-        System.out.println("Задачи:");
-        for (Task task : manager.getTasksList()) {
-            System.out.println(task);
-        }
-        System.out.println("Эпики:");
-        for (Epic epic : manager.getEpicsList()) {
-            System.out.println(epic);
-
-            for (Task task : manager.getSubtasksListByEpic(epic)) {
-                System.out.println("--> " + task);
-            }
-        }
-        System.out.println("Подзадачи:");
-        for (Task subtask : manager.getSubtasksList()) {
-            System.out.println(subtask);
-        }
-
+    private static void printHistory(TaskManager manager) {
         System.out.println("История:");
         for (Task task : manager.getHistory()) {
             System.out.println(task);
         }
+        System.out.println();
+    }
+
+    private static void userScenarioSample(TaskManager taskManager) {
+        Task task1 = new Task("Первая задача", "Пример запланированной задачи");
+        Integer idTask1 = taskManager.addTask(task1);
+        Task task2 = new Task("Вторая задача", "Пример задачи в работе", TaskStatus.IN_PROGRESS);
+        Integer idTask2 = taskManager.addTask(task2);
+        Epic epic1 = new Epic("Первый эпик", "Первое эпичное описание");
+        Integer idEpic1 = taskManager.addEpic(epic1);
+
+        Subtask subtask1 = new Subtask("Первая подзадачка", "Запланированная подзадача", TaskStatus.DONE, idEpic1);
+        Integer idSubtask1 = taskManager.addSubtask(subtask1);
+        Subtask subtask2 = new Subtask("Вторая подзадачка", "Подзадача в работе", idEpic1);
+        Integer idSubtask2 = taskManager.addSubtask(subtask2);
+        Subtask subtask3 = new Subtask("Третья подзадачка", "Подзадача в работе", idEpic1);
+        Integer idSubtask3 = taskManager.addSubtask(subtask3);
+
+        Epic epic2 = new Epic("Второй эпик", "Второе эпичное описание");
+        Integer idEpic2 = taskManager.addEpic(epic2);
+
+        System.out.println("1й вариант последовательности запроса задач");
+        taskManager.getTaskById(idTask1);
+        taskManager.getTaskById(idTask2);
+        taskManager.getEpicById(idEpic1);
+        taskManager.getSubtaskById(idSubtask1);
+        taskManager.getSubtaskById(idSubtask2);
+        taskManager.getSubtaskById(idSubtask3);
+        taskManager.getEpicById(idEpic2);
+
+        printHistory(taskManager);
+
+        System.out.println("2й вариант последовательности запроса задач");
+        taskManager.getEpicById(idEpic2);
+        taskManager.getSubtaskById(idSubtask3);
+        taskManager.getSubtaskById(idSubtask2);
+        taskManager.getSubtaskById(idSubtask1);
+        taskManager.getEpicById(idEpic1);
+        taskManager.getTaskById(idTask2);
+        taskManager.getTaskById(idTask1);
+
+        printHistory(taskManager);
+
+        System.out.println("3й вариант последовательности запроса задач");
+        taskManager.getSubtaskById(idSubtask3);
+        taskManager.getTaskById(idTask2);
+        taskManager.getEpicById(idEpic1);
+        taskManager.getSubtaskById(idSubtask1);
+        taskManager.getTaskById(idTask1);
+        taskManager.getEpicById(idEpic2);
+        taskManager.getSubtaskById(idSubtask2);
+
+        printHistory(taskManager);
+
+        //удаление задачи
+        System.out.println("Удаление задачи с id = " + idTask2);
+        taskManager.deleteTaskById(idTask2);
+        printHistory(taskManager);
+
+        //удаление эпика с тремя подзадачами
+        System.out.println("Удаление эпика с id = " + idEpic1);
+        taskManager.deleteEpicById(idEpic1);
+        printHistory(taskManager);
     }
 }

@@ -1,6 +1,6 @@
 package taskmodel;
 
-public class Subtask extends Task{
+public class Subtask extends Task {
     private Integer idEpic;
 
     /**конструктор для подзадачи, уже заведенной в менеджер (обновление, удаление)*/
