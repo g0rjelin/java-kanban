@@ -39,10 +39,10 @@ class InMemoryHistoryManagerTest {
         Assertions.assertEquals(numTaskInHistoryForTest, historyManager.getHistory().size(),
                 "В истории должны храниться все добавленные задачи (из " + numTaskInHistoryForTest + " задач)");
 
-        Task lastTask = new Task(numTaskInHistoryForTest+1, "TestHistory last task",
+        Task lastTask = new Task(numTaskInHistoryForTest + 1, "TestHistory last task",
                 "Test last task description", TaskStatus.NEW);
         historyManager.add(lastTask);
-        Assertions.assertEquals(lastTask, historyManager.getHistory().get(historyManager.getHistory().size()-1),
+        Assertions.assertEquals(lastTask, historyManager.getHistory().get(historyManager.getHistory().size() - 1),
                 "В истории последняя добавленная задача возвращается последней в списке");
 
     }
@@ -58,6 +58,7 @@ class InMemoryHistoryManagerTest {
                 "Test check_remove №" + 2 + " description", TaskStatus.NEW);
         historyManager.add(task2);
 
+
         historyManager.remove(idAdd1);
         Assertions.assertEquals(1, historyManager.getHistory().size(),
                 "После удаления размер истории должно уменьшаться на 1");
@@ -66,7 +67,8 @@ class InMemoryHistoryManagerTest {
 
         int idNotAdded = 3333;
         historyManager.remove(idNotAdded);
-        Assertions.assertTrue(1 == historyManager.getHistory().size() && historyManager.getHistory().get(0).getId() == idAdd2,
+        Assertions.assertTrue(
+                1 == historyManager.getHistory().size() && historyManager.getHistory().get(0).getId() == idAdd2,
                 "Удаление задачи с id, которого нет в менеджере, не влияет на историю");
 
         historyManager.remove(idAdd2);
@@ -76,6 +78,53 @@ class InMemoryHistoryManagerTest {
         historyManager.remove(idAdd2);
         Assertions.assertTrue(historyManager.getHistory().isEmpty(),
                 "Удаление из пустой истории ни к чему не приводит");
+
+
+        int idAdd3 = 3;
+        Task task3 = new Task(idAdd3, "TestHistory check_remove №" + 3,
+                "Test check_remove №" + 3 + " description", TaskStatus.NEW);
+        //проверка удаления из начала истории
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+
+        historyManager.remove(idAdd1);
+        Assertions.assertTrue(idAdd2 == historyManager.getHistory().get(0).getId() &&
+                        idAdd3 == historyManager.getHistory().get(1).getId() &&
+                        historyManager.getHistory().size() == 2,
+                "Некорректно работает удаление из начала истории: \n" +
+                        String.format(
+                                "В начале истории должна остаться задача задача с id = %d, заканчиваться задачей с id = %d",
+                                idAdd2, idAdd3));
+        historyManager.getHistory().clear();
+
+        //проверка удаления из середины истории
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        historyManager.remove(idAdd2);
+        Assertions.assertTrue(idAdd1 == historyManager.getHistory().get(0).getId() &&
+                        idAdd3 == historyManager.getHistory().get(1).getId() &&
+                        historyManager.getHistory().size() == 2,
+                "Некорректно работает удаление из середины истории: \n" +
+                        String.format(
+                                "В начале истории должна остаться задача задача с id = %d, заканчиваться задачей с id = %d",
+                                idAdd1, idAdd3));
+        historyManager.getHistory().clear();
+
+        //проверка удаления из конца истории
+        historyManager.add(task1);
+        historyManager.add(task2);
+        historyManager.add(task3);
+        historyManager.remove(idAdd3);
+        Assertions.assertTrue(idAdd1 == historyManager.getHistory().get(0).getId() &&
+                        idAdd2 == historyManager.getHistory().get(1).getId() &&
+                        historyManager.getHistory().size() == 2,
+                "Некорректно работает удаление из конца истории: \n" +
+                        String.format(
+                                "В начале истории должна остаться задача задача с id = %d, заканчиваться задачей с id = %d",
+                                idAdd1, idAdd2));
+
     }
 
 }

@@ -38,10 +38,7 @@ public class InMemoryHistoryManager implements HistoryManager {
 
     @Override
     public void remove(int id) {
-        if (history.containsKey(id)) {
-            removeNode(history.get(id));
-            history.remove(id);
-        }
+        removeNode(history.get(id));
     }
 
     @Override
@@ -50,15 +47,13 @@ public class InMemoryHistoryManager implements HistoryManager {
     }
 
     private Node linkLast(Task task) {
-        Node oldTail = tail;
-        Node newNode = new Node(oldTail, task, null);
-        tail = newNode;
-        if (oldTail == null) {
+        Node newNode = new Node(tail, task, null);
+        if (tail == null) {
             head = newNode;
         } else {
-            //ссылка на предыдущий "хвост" (oldTail) при создании ноды через конструктор
-            oldTail.setNext(newNode);
+            tail.next = newNode;
         }
+        tail = newNode; //"хвост" начинает ссылаться на новую созданную ноду
         return newNode;
     }
 
@@ -66,34 +61,69 @@ public class InMemoryHistoryManager implements HistoryManager {
         List<Task> resultList = new ArrayList<>(history.size());
         Node currentNode = head;
         while (currentNode != null) {
-            resultList.add(currentNode.getTask());
-            currentNode = currentNode.getNext();
+            resultList.add(currentNode.task);
+            currentNode = currentNode.next;
         }
         return resultList;
     }
 
     private void removeNode(Node node) {
         if (node == null) return;
-        Node prevNode = node.getPrev();
-        Node nextNode = node.getNext();
+        Node prevNode = node.prev;
+        Node nextNode = node.next;
         if (prevNode == null && nextNode == null) {
             head = null;
             tail = null;
             history.clear();
         } else {
             if (prevNode != null) {
-                prevNode.setNext(nextNode);
+                prevNode.next = nextNode;
             } else {
                 head = nextNode;
-                nextNode.setPrev(null);
+                nextNode.prev = null;
             }
             if (nextNode != null) {
-                nextNode.setPrev(prevNode);
+                nextNode.prev = prevNode;
             } else {
                 tail = prevNode;
-                prevNode.setNext(null);
+                prevNode.next = null;
             }
+            history.remove(node.task.getId());
         }
+    }
+
+    private static class Node {
+
+        private Task task;
+        private Node next;
+        private Node prev;
+
+
+        Node(Node prev, Task task, Node next) {
+            this.task = task;
+            this.prev = prev;
+            this.next = next;
+        }
+
+        /*Task getTask() {
+            return task;
+        }
+
+        Node getNext() {
+            return next;
+        }
+
+        void setNext(Node next) {
+            this.next = next;
+        }
+
+        Node getPrev() {
+            return prev;
+        }
+
+        void setPrev(Node prev) {
+            this.prev = prev;
+        }*/
     }
 
 }
