@@ -105,25 +105,6 @@ public class InMemoryHistoryManager implements HistoryManager {
             this.next = next;
         }
 
-        /*Task getTask() {
-            return task;
-        }
-
-        Node getNext() {
-            return next;
-        }
-
-        void setNext(Node next) {
-            this.next = next;
-        }
-
-        Node getPrev() {
-            return prev;
-        }
-
-        void setPrev(Node prev) {
-            this.prev = prev;
-        }*/
     }
 
 }
