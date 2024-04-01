@@ -21,4 +21,5 @@ public class SubtaskTest {
         Assertions.assertEquals(subtaskOneWithId1, subtaskTwoWithId1, "Экземпляры класса Subtask должны быть равны друг другу, если равен их id");
         Assertions.assertNotEquals(subtaskOneWithId1, subtaskThreeWithId2, "Экземпляры Subtask с разным id не должны быть равны");
     }
+
 }
