@@ -89,4 +89,9 @@ public class Task {
                 ", status=" + status +
                 '}';
     }
+
+    public String taskToString() {
+        return String.format("%d,%s,%s,%s,%s,",id, getClass().getSimpleName().toUpperCase(), name, status.toString(), description);
+    }
+
 }

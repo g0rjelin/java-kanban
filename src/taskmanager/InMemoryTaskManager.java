@@ -12,15 +12,22 @@ import java.util.List;
 public class InMemoryTaskManager implements TaskManager {
     private int idSeq = 0; //счетчик задач в менеджере
 
-    private HashMap<Integer, Task> tasks;
-    private HashMap<Integer, Epic> epics;
-    private HashMap<Integer, Subtask> subtasks;
-    private HistoryManager historyManager;
+    protected HashMap<Integer, Task> tasks;
+    protected HashMap<Integer, Epic> epics;
+    protected HashMap<Integer, Subtask> subtasks;
+    protected HistoryManager historyManager;
 
     public InMemoryTaskManager(HistoryManager historyManager) {
         tasks = new HashMap<>();
         epics = new HashMap<>();
         subtasks = new HashMap<>();
+        this.historyManager = historyManager;
+    }
+
+    protected InMemoryTaskManager(HistoryManager historyManager, HashMap<Integer,Task> tasks, HashMap<Integer, Epic> epics, HashMap<Integer, Subtask> subtasks) {
+        this.tasks = tasks;
+        this.epics = epics;
+        this.subtasks = subtasks;
         this.historyManager = historyManager;
     }
 
@@ -271,7 +278,7 @@ public class InMemoryTaskManager implements TaskManager {
     /**
      * обновление статуса эпика
      */
-    private void updateEpicStatus(Epic epic) {
+    protected void updateEpicStatus(Epic epic) {
         if (epic.getSubtaskIdList().isEmpty()) {
             epic.setStatus(TaskStatus.NEW);
         } else {
@@ -288,6 +295,10 @@ public class InMemoryTaskManager implements TaskManager {
             epic.setStatus(currentSubTaskStatus);
         }
     }
+
+    /*
+    *
+    * */
 
 
 }
