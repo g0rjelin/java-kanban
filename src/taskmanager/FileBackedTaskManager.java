@@ -6,14 +6,13 @@ import taskmodel.Task;
 import taskmodel.TaskStatus;
 import taskmodel.TaskType;
 
+
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
@@ -25,6 +24,13 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public FileBackedTaskManager(HistoryManager historyManager) {
         super(historyManager);
         taskManagerPath = Paths.get(DEFAULT_TASK_MANAGER_PATH);
+        try {
+            if (!Files.exists(taskManagerPath)) {
+                Files.createFile(taskManagerPath);
+            }
+        } catch (IOException e) {
+            throw new ManagerSaveException("Ошибка при создании файла менеджера задач");
+        }
     }
 
     public FileBackedTaskManager(HistoryManager historyManager, Path taskManagerPath) {
@@ -32,80 +38,47 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         this.taskManagerPath = taskManagerPath;
     }
 
-    private FileBackedTaskManager(HistoryManager historyManager, HashMap<Integer, Task> tasks,
-                                  HashMap<Integer, Epic> epics, HashMap<Integer, Subtask> subtasks) {
-        super(historyManager, tasks, epics, subtasks);
-    }
+    static FileBackedTaskManager loadFromFile(Path taskManagerFile) {
+        FileBackedTaskManager fileBackedTaskManager = new FileBackedTaskManager(Managers.getDefaultHistory());
 
-    private FileBackedTaskManager(HistoryManager historyManager, HashMap<Integer, Task> tasks,
-                                  HashMap<Integer, Epic> epics, HashMap<Integer, Subtask> subtasks,
-                                  Path taskManagerPath) {
-        this(historyManager, tasks, epics, subtasks);
-        this.taskManagerPath = taskManagerPath;
-    }
-
-    private static Task fromString(String value) throws ManagerSaveException {
-        String[] values = value.split(",");
-        switch (TaskType.valueOf(values[1])) {
-            case TASK:
-                return new Task(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]));
-            case EPIC:
-                return new Epic(Integer.valueOf(values[0]), values[2], values[4], new ArrayList<>());
-            case SUBTASK:
-                return new Subtask(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]),
-                        Integer.valueOf(values[5]));
-            default:
-                throw new ManagerSaveException("Ошибка парсинга записи");
-        }
-    }
-
-    static FileBackedTaskManager loadFromFile(Path taskManagerFile, Path historyManagerFile)
-            throws ManagerSaveException {
-        FileBackedHistoryManager historyManager = new FileBackedHistoryManager(historyManagerFile);
-        HashMap<Integer, Task> tasks = new HashMap<>();
-        HashMap<Integer, Subtask> subtasks = new HashMap<>();
-        HashMap<Integer, Epic> epics = new HashMap<>();
         try {
             List<String> taskLines = Files.readAllLines(taskManagerFile);
-            String historyString = Files.readString(historyManagerFile);
-            for (int i = 1; i < taskLines.size(); i++) {
-                Task task = fromString(taskLines.get(i));
-                if (task instanceof Subtask) {
-                    subtasks.put(task.getId(), (Subtask) task);
-                } else if (task instanceof Epic) {
-                    epics.put(task.getId(), (Epic) task);
-                } else {
-                    tasks.put(task.getId(), task);
+            String historyString = taskLines.get(taskLines.size() - 1); //Files.readString(taskManagerFile);
+            for (int i = 1; i < taskLines.size() - 2; i++) {
+                Task task = Managers.fromString(taskLines.get(i));
+                String[] taskLineValues = taskLines.get(i).split(",");
+                switch (TaskType.valueOf(taskLineValues[1])) {
+                    case TASK:
+                        fileBackedTaskManager.tasks.put(task.getId(), task);
+                        break;
+                    case EPIC:
+                        fileBackedTaskManager.epics.put(task.getId(), (Epic) task);
+                        break;
+                    case SUBTASK:
+                        fileBackedTaskManager.subtasks.put(task.getId(), (Subtask) task);
+                        break;
+                    default:
+                        throw new ManagerSaveException("Ошибка загрузки менеджера задач");
                 }
             }
             //восстановление информации о списке id подзадач в эпике
-            for (Subtask subtask : subtasks.values()) {
-                Epic epic = epics.get(subtask.getIdEpic());
+            for (Subtask subtask : fileBackedTaskManager.subtasks.values()) {
+                Epic epic = fileBackedTaskManager.epics.get(subtask.getIdEpic());
                 epic.addIdSubtask(subtask.getId());
             }
-            FileBackedTaskManager taskManager =
-                    new FileBackedTaskManager(historyManager, tasks, epics, subtasks, taskManagerFile);
-            //определение статусов эпиков
-            for (Epic epic : epics.values()) {
-                taskManager.updateEpicStatus(epic);
-            }
-            //т.к. при определении статуса эпиков идет поиск подзадач по id, то меняется история, почистим ее перед заполнением
-            for (int i = 0; i < historyManager.getHistory().size(); i++) {
-                historyManager.remove(taskManager.getHistoryManager().getHistory().get(i).getId());
-            }
-            List<Integer> historyIdList = FileBackedHistoryManager.historyFromString(historyString);
+            List<Integer> historyIdList = Managers.historyFromString(historyString);
             for (Integer historyId : historyIdList) {
-                if (tasks.containsKey(historyId)) {
-                    historyManager.add(tasks.get(historyId));
-                } else if (epics.containsKey(historyId)) {
-                    historyManager.add(epics.get(historyId));
-                } else if (subtasks.containsKey(historyId)) {
-                    historyManager.add(subtasks.get(historyId));
+                if (fileBackedTaskManager.tasks.containsKey(historyId)) {
+                    fileBackedTaskManager.historyManager.add(fileBackedTaskManager.tasks.get(historyId));
+                } else if (fileBackedTaskManager.epics.containsKey(historyId)) {
+                    fileBackedTaskManager.historyManager.add(fileBackedTaskManager.epics.get(historyId));
+                } else if (fileBackedTaskManager.subtasks.containsKey(historyId)) {
+                    fileBackedTaskManager.historyManager.add(fileBackedTaskManager.subtasks.get(historyId));
                 } else {
                     throw new ManagerSaveException("В истории указан несуществующий идентификатор задачи менеджера");
                 }
             }
-            return taskManager;
+            return fileBackedTaskManager;
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка чтения файла");
         }
@@ -114,9 +87,9 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     /**
      * Реализация пользовательского сценария
      */
-    public static void main(String[] args) throws ManagerSaveException {
+    public static void main(String[] args) {
         //1. Заведите несколько разных задач, эпиков и подзадач.
-        FileBackedTaskManager taskManager = new FileBackedTaskManager(new FileBackedHistoryManager());
+        FileBackedTaskManager taskManager = new FileBackedTaskManager(Managers.getDefaultHistory());
         Task task1 = new Task("Первая задача", "Пример запланированной задачи");
         Integer idTask1 = taskManager.addTask(task1);
         Task task2 = new Task("Вторая задача", "Пример задачи в работе", TaskStatus.IN_PROGRESS);
@@ -141,8 +114,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         taskManager.getSubtaskById(idSubtask3);
         taskManager.getEpicById(idEpic2);
         //2. Создайте новый FileBackedTaskManager-менеджер из этого же файла.
-        FileBackedTaskManager newTaskManager = loadFromFile(Paths.get(DEFAULT_TASK_MANAGER_PATH),
-                Paths.get(FileBackedHistoryManager.DEFAULT_HISTORY_MANAGER_PATH));
+        FileBackedTaskManager newTaskManager = loadFromFile(Paths.get(DEFAULT_TASK_MANAGER_PATH));
         //3. Проверьте, что все задачи, эпики, подзадачи, которые были в старом менеджере, есть в новом.
         System.out.format("Результат проверки на равенство задач, эпиков, подзадач и истории просмотров: %b",
                 taskManager.getTasksList().equals(newTaskManager.getTasksList())
@@ -168,6 +140,30 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public void removeAllSubtasks() {
         super.removeAllSubtasks();
         save();
+    }
+
+    @Override
+    public Task getTaskById(Integer id) {
+        Task task = tasks.get(id);
+        historyManager.add(task);
+        save();
+        return task;
+    }
+
+    @Override
+    public Epic getEpicById(Integer id) {
+        Epic epic = epics.get(id);
+        historyManager.add(epic);
+        save();
+        return epic;
+    }
+
+    @Override
+    public Subtask getSubtaskById(Integer id) {
+        Subtask subtask = subtasks.get(id);
+        historyManager.add(subtask);
+        save();
+        return subtask;
     }
 
     @Override
@@ -233,23 +229,23 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     /**
      * Сохранение всех задач, подзадач, эпиков и истории просмотра любых задач
      */
-    private void save() {
+    void save() {
         try {
-            if (!Files.exists(taskManagerPath)) {
-                Files.createFile(taskManagerPath);
-            }
             Writer taskManagerFileWriter = new FileWriter(String.valueOf(taskManagerPath));
 
             taskManagerFileWriter.write(TASK_CSV_HEADER + "\n");
             for (Integer taskId : tasks.keySet()) {
-                taskManagerFileWriter.write(tasks.get(taskId).taskToString() + "\n");
+                taskManagerFileWriter.write(Managers.taskToString(tasks.get(taskId)) + "\n");
             }
             for (Integer epicId : epics.keySet()) {
-                taskManagerFileWriter.write(epics.get(epicId).taskToString() + "\n");
+                taskManagerFileWriter.write(Managers.taskToString(epics.get(epicId)) + "\n");
             }
             for (Integer subtaskId : subtasks.keySet()) {
-                taskManagerFileWriter.write(subtasks.get(subtaskId).taskToString() + "\n");
+                taskManagerFileWriter.write(Managers.subtaskToString(subtasks.get(subtaskId)) + "\n");
             }
+            taskManagerFileWriter.write("\n");
+            String historyString = Managers.historyToString(historyManager);
+            taskManagerFileWriter.write(historyString);
             taskManagerFileWriter.close();
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка автосохранения менеджера");
