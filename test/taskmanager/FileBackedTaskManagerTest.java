@@ -47,13 +47,13 @@ class FileBackedTaskManagerTest {
         //загрузка из файла в новый менеджер
         FileBackedTaskManager loadedTaskManager = FileBackedTaskManager.loadFromFile(testTaskManagerPath);
 
-        Assertions.assertIterableEquals(initTaskManager.getTasksList(), loadedTaskManager.getTasksList(),
+        Assertions.assertEquals(initTaskManager.getTasksList(), loadedTaskManager.getTasksList(),
                 "Задачи в первоначальном менеджере и после загрузки из файла должны совпадать");
-        Assertions.assertIterableEquals(initTaskManager.getSubtasksList(), loadedTaskManager.getSubtasksList(),
+        Assertions.assertEquals(initTaskManager.getSubtasksList(), loadedTaskManager.getSubtasksList(),
                 "Подзадачи в первоначальном менеджере и после загрузки из файла должны совпадать");
-        Assertions.assertIterableEquals(initTaskManager.getEpicsList(), loadedTaskManager.getEpicsList(),
+        Assertions.assertEquals(initTaskManager.getEpicsList(), loadedTaskManager.getEpicsList(),
                 "Эпики в первоначальном менеджере и после загрузки из файла должны совпадать");
-        Assertions.assertIterableEquals(initTaskManager.historyManager.getHistory(),
+        Assertions.assertEquals(initTaskManager.historyManager.getHistory(),
                 loadedTaskManager.historyManager.getHistory(),
                 "История просмотров в первоначальном менеджере и после загрузки из файла должна совпадать");
     }
