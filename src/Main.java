@@ -4,6 +4,8 @@ import taskmodel.Subtask;
 import taskmodel.Task;
 import taskmodel.TaskStatus;
 
+import java.time.Duration;
+
 public class Main {
 
     public static void main(String[] args) {
@@ -23,18 +25,18 @@ public class Main {
     }
 
     private static void userScenarioSample(TaskManager taskManager) {
-        Task task1 = new Task("Первая задача", "Пример запланированной задачи");
+        Task task1 = new Task("Первая задача", "Пример запланированной задачи", Duration.ofMinutes(15));
         Integer idTask1 = taskManager.addTask(task1);
-        Task task2 = new Task("Вторая задача", "Пример задачи в работе", TaskStatus.IN_PROGRESS);
+        Task task2 = new Task("Вторая задача", "Пример задачи в работе", TaskStatus.IN_PROGRESS, Duration.ofMinutes(15));
         Integer idTask2 = taskManager.addTask(task2);
         Epic epic1 = new Epic("Первый эпик", "Первое эпичное описание");
         Integer idEpic1 = taskManager.addEpic(epic1);
 
-        Subtask subtask1 = new Subtask("Первая подзадачка", "Запланированная подзадача", TaskStatus.DONE, idEpic1);
+        Subtask subtask1 = new Subtask("Первая подзадачка", "Запланированная подзадача", TaskStatus.DONE, Duration.ofMinutes(15), idEpic1);
         Integer idSubtask1 = taskManager.addSubtask(subtask1);
-        Subtask subtask2 = new Subtask("Вторая подзадачка", "Подзадача в работе", idEpic1);
+        Subtask subtask2 = new Subtask("Вторая подзадачка", "Подзадача в работе", Duration.ofMinutes(15), idEpic1);
         Integer idSubtask2 = taskManager.addSubtask(subtask2);
-        Subtask subtask3 = new Subtask("Третья подзадачка", "Подзадача в работе", idEpic1);
+        Subtask subtask3 = new Subtask("Третья подзадачка", "Подзадача в работе", Duration.ofMinutes(15), idEpic1);
         Integer idSubtask3 = taskManager.addSubtask(subtask3);
 
         Epic epic2 = new Epic("Второй эпик", "Второе эпичное описание");

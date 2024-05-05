@@ -6,6 +6,8 @@ import taskmodel.Task;
 import taskmodel.TaskStatus;
 import taskmodel.TaskType;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -14,19 +16,35 @@ public final class FileBackedUtils {
         String[] values = value.split(",");
         switch (TaskType.valueOf(values[1])) {
             case TASK:
-                return new Task(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]));
+                return values[6].equals("null") ?
+                        new Task(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]),
+                                Duration.ofMinutes(Integer.parseInt(values[5]))) :
+                        new Task(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]),
+                                Duration.ofMinutes(Integer.parseInt(values[5])), LocalDateTime.parse(values[6]));
             case EPIC:
-                return new Epic(Integer.valueOf(values[0]), values[2], values[4], new ArrayList<>());
+                return values[6].equals("null") ?
+                        new Epic(Integer.valueOf(values[0]), values[2], values[4],
+                                Duration.ofMinutes(Integer.parseInt(values[5])), new ArrayList<>()) :
+                        new Epic(Integer.valueOf(values[0]), values[2], values[4],
+                                Duration.ofMinutes(Integer.parseInt(values[5])), LocalDateTime.parse(values[6]),
+                                new ArrayList<>());
             case SUBTASK:
-                return new Subtask(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]),
-                        Integer.valueOf(values[5]));
+                return values[6].equals("null") ?
+                        new Subtask(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]),
+                                Duration.ofMinutes(Integer.parseInt(values[5])), Integer.valueOf(values[7])) :
+                        new Subtask(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]),
+                                Duration.ofMinutes(Integer.parseInt(values[5])), LocalDateTime.parse(values[6]),
+                                Integer.valueOf(values[7]));
             default:
                 throw new ManagerSaveException("Ошибка парсинга записи");
         }
     }
 
     public static String taskToString(Task task) {
-        return String.format("%d,%s,%s,%s,%s,",task.getId(), task.getClass().getSimpleName().toUpperCase(), task.getName(), task.getStatus().toString(), task.getDescription());
+        return String.format("%d,%s,%s,%s,%s,%d,%s,", task.getId(), task.getClass().getSimpleName().toUpperCase(),
+                task.getName(),
+                task.getStatus().toString(), task.getDescription(), task.getDuration().getSeconds() / 60,
+                task.getStartTime());
     }
 
     public static String subtaskToString(Subtask subtask) {
