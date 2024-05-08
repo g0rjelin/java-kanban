@@ -14,27 +14,36 @@ import java.util.List;
 public final class FileBackedUtils {
     public static Task fromString(String value) {
         String[] values = value.split(",");
+        Integer id = Integer.valueOf(values[0]);
+        String name = values[2];
+        String description = values[4];
+        TaskStatus status = TaskStatus.valueOf(values[3]);
+        Duration duration = Duration.ofMinutes(Integer.parseInt(values[5]));
+        LocalDateTime startTime = null;
+        if (!values[6].equals("null")) {
+            startTime = LocalDateTime.parse(values[6]);
+        }
         switch (TaskType.valueOf(values[1])) {
             case TASK:
-                return values[6].equals("null") ?
-                        new Task(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]),
-                                Duration.ofMinutes(Integer.parseInt(values[5]))) :
-                        new Task(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]),
-                                Duration.ofMinutes(Integer.parseInt(values[5])), LocalDateTime.parse(values[6]));
+                return startTime == null ?
+                        new Task(id, name, description, status,
+                                duration) :
+                        new Task(id, name, description, status,
+                                duration, startTime);
             case EPIC:
-                return values[6].equals("null") ?
-                        new Epic(Integer.valueOf(values[0]), values[2], values[4],
-                                Duration.ofMinutes(Integer.parseInt(values[5])), new ArrayList<>()) :
-                        new Epic(Integer.valueOf(values[0]), values[2], values[4],
-                                Duration.ofMinutes(Integer.parseInt(values[5])), LocalDateTime.parse(values[6]),
+                return startTime == null ?
+                        new Epic(id, name, description,
+                                duration, new ArrayList<>()) :
+                        new Epic(id, name, description,
+                                duration, startTime,
                                 new ArrayList<>());
             case SUBTASK:
-                return values[6].equals("null") ?
-                        new Subtask(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]),
-                                Duration.ofMinutes(Integer.parseInt(values[5])), Integer.valueOf(values[7])) :
-                        new Subtask(Integer.valueOf(values[0]), values[2], values[4], TaskStatus.valueOf(values[3]),
-                                Duration.ofMinutes(Integer.parseInt(values[5])), LocalDateTime.parse(values[6]),
-                                Integer.valueOf(values[7]));
+                Integer epicId = Integer.valueOf(values[7]);
+                return startTime == null ?
+                        new Subtask(id, name, description, status,
+                                duration, epicId) :
+                        new Subtask(id, name, description, status,
+                                duration, startTime, epicId);
             default:
                 throw new ManagerSaveException("Ошибка парсинга записи");
         }

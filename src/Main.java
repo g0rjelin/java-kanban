@@ -5,6 +5,7 @@ import taskmodel.Task;
 import taskmodel.TaskStatus;
 
 import java.time.Duration;
+import java.time.LocalDateTime;
 
 public class Main {
 
@@ -32,9 +33,11 @@ public class Main {
         Epic epic1 = new Epic("Первый эпик", "Первое эпичное описание");
         Integer idEpic1 = taskManager.addEpic(epic1);
 
-        Subtask subtask1 = new Subtask("Первая подзадачка", "Запланированная подзадача", TaskStatus.DONE, Duration.ofMinutes(15), idEpic1);
+        Subtask subtask1 = new Subtask("Первая подзадачка", "Запланированная подзадача", TaskStatus.DONE, Duration.ofMinutes(15),
+                LocalDateTime.parse("2024-01-01T01:00:00"), idEpic1);
         Integer idSubtask1 = taskManager.addSubtask(subtask1);
-        Subtask subtask2 = new Subtask("Вторая подзадачка", "Подзадача в работе", Duration.ofMinutes(15), idEpic1);
+        Subtask subtask2 = new Subtask("Вторая подзадачка", "Подзадача в работе", Duration.ofMinutes(15),
+                LocalDateTime.parse("2024-02-01T12:00:00"), idEpic1);
         Integer idSubtask2 = taskManager.addSubtask(subtask2);
         Subtask subtask3 = new Subtask("Третья подзадачка", "Подзадача в работе", Duration.ofMinutes(15), idEpic1);
         Integer idSubtask3 = taskManager.addSubtask(subtask3);

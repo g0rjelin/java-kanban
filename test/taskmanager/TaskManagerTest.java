@@ -1,6 +1,8 @@
 package taskmanager;
 
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import taskmodel.Epic;
 import taskmodel.Subtask;
 import taskmodel.Task;
@@ -16,14 +18,26 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 abstract class TaskManagerTest<T extends TaskManager> {
-    T taskManager;
-    Task task;
-    Epic epic;
+    protected T taskManager;
+    protected Task task;
+    protected Epic epic;
 
+    protected abstract T createTaskManager();
+
+    @BeforeEach
+    public void setUp() {
+        taskManager = createTaskManager();
+        task = new Task("Test TaskManager task",
+                "Test TaskManager task description",
+                TaskStatus.NEW, Duration.ofMinutes(15), LocalDateTime.of(2024, 02, 24, 17, 05, 30));
+        epic = new Epic("Test TaskManager epic",
+                "Test TaskManager epic description");
+    }
 
     /**
      * проверка работы TaskManager: добавление задачи
      */
+    @Test
     public void addNewTask() {
         final int taskId = taskManager.addTask(task);
 
@@ -42,6 +56,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы TaskManager: обновление задачи
      */
+    @Test
     public void updateTask() {
         final int taskId = taskManager.addTask(task);
         Task updTask = new Task(taskId, "Test InMemoryTaskManager Updated task",
@@ -58,6 +73,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы: удаление задачи
      */
+    @Test
     public void deleteTask() {
         final int taskId = taskManager.addTask(task);
 
@@ -70,6 +86,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка неизменности задачи (по всем полям) при добавлении задачи в менеджер
      */
+    @Test
     public void shouldTaskFieldsNotBeChangedWhenAddedToTaskManager() {
         Task task = new Task("Test task to be added to manager", "Test task to be added to manager description",
                 TaskStatus.NEW, Duration.ofMinutes(15));
@@ -90,6 +107,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка отсутствия конфликта между задачи с заданным id и сгенерированным id внутри менеджера
      */
+    @Test
     public void shouldNotConflictBetweenTaskWithSetIdAndGeneratedId() {
         int taskGenId = taskManager.addTask(task);
         String nameBeforeAdd = task.getName();
@@ -117,6 +135,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы TaskManager: добавление эпика
      */
+    @Test
     public void addNewEpic() {
         final int epicId = taskManager.addEpic(epic);
 
@@ -140,6 +159,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы TaskManager: обновление эпика
      */
+    @Test
     public void updateEpic() {
         final int epicId = taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Test InMemory subtask", "Test InMemory subtask description",
@@ -161,6 +181,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы TaskManager: удаление эпика
      */
+    @Test
     public void deleteEpic() {
         final int epicId = taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Test InMemory subtask", "Test InMemory subtask description",
@@ -181,6 +202,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка отсутствия конфликта между эпиком с заданным id и сгенерированным id внутри менеджера
      */
+    @Test
     public void shouldNotConflictBetweenEpicWithSetIdAndGeneratedId() {
         int epicGenId = taskManager.addEpic(epic);
         String nameBeforeAdd = epic.getName();
@@ -211,6 +233,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы TaskManager: добавление подзадачи
      */
+    @Test
     public void addNewSubtask() {
         final int epicId = taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Test addNewSubtask", "Test addNewSubtask description",
@@ -232,6 +255,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы TaskManager: обновление подзадачи
      */
+    @Test
     public void updateSubtask() {
         final int epicId = taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Test InMemoryTaskManager subtask",
@@ -253,6 +277,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы TaskManager: удаление подзадачи
      */
+    @Test
     public void deleteSubtask() {
         final int epicId = taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Test InMemoryTaskManager subtask",
@@ -271,6 +296,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка отсутствия конфликта между подзадачей с заданным id и сгенерированным id внутри менеджера
      */
+    @Test
     public void shouldNotConflictBetweenSubtaskWithSetIdAndGeneratedId() {
         Epic epic = new Epic("Test add epic to manager with id", "Test add epic to manager with id description");
         taskManager.addEpic(epic);
@@ -306,6 +332,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка, что объект Epic нельзя добавить в самого себя в виде подзадачи
      */
+    @Test
     public void shouldNotAddEpicIntoEpicAsSubtask() {
         Epic epic = new Epic("Эпик: тест добавления в себя в виде подзадачи",
                 "Описание: тест добавления в себя в виде подзадачи");
@@ -319,6 +346,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка, что объект Subtask нельзя сделать своим же эпиком (через добавление)
      */
+    @Test
     public void shouldNotAddSubtaskAsItsEpic() {
         Epic epic1 = new Epic("Эпик: начальный эпик подзадачи", "Описание: начальный эпик подзадачи");
         final int epicId = taskManager.addEpic(epic1);
@@ -341,6 +369,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка, что объект Subtask нельзя сделать своим же эпиком (через обновление)
      */
+    @Test
     public void shouldNotUpdateSubtaskAsItsEpic() {
         Epic epic1 = new Epic("Эпик: начальный эпик подзадачи", "Описание: начальный эпик подзадачи");
         final int epicId = taskManager.addEpic(epic1);
@@ -363,6 +392,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы TaskManager: проверка удаления всех задач
      */
+    @Test
     public void removeAllTasksTest() {
         final int taskId = taskManager.addTask(task);
 
@@ -375,6 +405,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы TaskManager: проверка удаления всех подзадач
      */
+    @Test
     public void removeAllSubtasksTest() {
         final int epicId = taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Test InMemoryTaskManager subtask",
@@ -391,6 +422,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * проверка работы InMemoryTaskManager: проверка удаления всех эпиков
      */
+    @Test
     public void removeAllEpicsTest() {
         final int epicId = taskManager.addEpic(epic);
         Subtask subtask = new Subtask("Test InMemoryTaskManager subtask",
@@ -410,6 +442,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * задачи, добавляемые в HistoryManager, сохраняют предыдущую версию задачи и её данных
      */
+    @Test
     public void shouldPreserveTaskPrevVersionInHistory() {
         String initName = "Test task Version 1";
         String initDescription = "Test task Version 1 Description";
@@ -471,6 +504,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * эпики, добавляемые в HistoryManager, сохраняют предыдущую версию эпика и её данных
      */
+    @Test
     public void shouldPreserveEpicPrevVersionInHistory() {
         String initName = "Test epic Version 1";
         String initDescription = "Test epic Version 1 Description";
@@ -539,6 +573,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * подзадачи, добавляемые в HistoryManager, сохраняют предыдущую версию подзадачи и её данных
      */
+    @Test
     public void shouldPreserveSubtaskPrevVersionInHistory() {
         Epic epic = new Epic("Epic Name for Subtask Test", "Epic Description for Subtask Test");
         int epicId = taskManager.addEpic(epic);
@@ -605,6 +640,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * Проверка правильной работы связного списка по анализу результата возврата истории
      * с разной последовательностью обращения к задачам
      */
+    @Test
     public void shouldLinkLastWorkCorrectly() {
         //подготовка данных
         Task task1 = new Task(1, "TestHistory check linkLast №" + 1,
@@ -651,6 +687,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      * Проверка расчета статуса эпика
      */
+    @Test
     void shouldCorrectlyUpdateEpicStatus() {
         Integer epicId = taskManager.addEpic(epic);
 
@@ -726,6 +763,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
     /**
      *  Тест на корректность расчёта пересечения интервалов
      */
+    @Test
     void shouldCorrectlyValidateIntersectionOfIntervals() {
         //кейс 1: не пересекаются
         Task task1 = new Task(1, "Test intersection 1",
