@@ -220,7 +220,7 @@ public class InMemoryTaskManager implements TaskManager {
         if (tasks.containsKey(updTask.getId())) {
             if (updTask.getStartTime() == null || hasTaskNoIntersections(updTask)) {
                 tasks.put(updTask.getId(), updTask);
-                prioritizedTasks.remove(updTask);
+                prioritizedTasks.remove(tasks.get(updTask.getId()));
                 if (updTask.getStartTime() != null) {
                     prioritizedTasks.add(updTask);
                 }
