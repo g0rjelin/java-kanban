@@ -8,6 +8,7 @@ import taskmodel.Subtask;
 import taskmodel.Task;
 import taskmodel.TaskStatus;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -33,14 +34,14 @@ class InMemoryHistoryManagerTest {
         int numTaskInHistoryForTest = 15;
         for (int i = 1; i <= numTaskInHistoryForTest; i++) {
             Task task = new Task(i, "TestHistory check_size_task №" + i,
-                    "Test check_size_task №" + i + " description", TaskStatus.NEW);
+                    "Test check_size_task №" + i + " description", TaskStatus.NEW, Duration.ofMinutes(15));
             historyManager.add(task);
         }
         Assertions.assertEquals(numTaskInHistoryForTest, historyManager.getHistory().size(),
                 "В истории должны храниться все добавленные задачи (из " + numTaskInHistoryForTest + " задач)");
 
         Task lastTask = new Task(numTaskInHistoryForTest + 1, "TestHistory last task",
-                "Test last task description", TaskStatus.NEW);
+                "Test last task description", TaskStatus.NEW, Duration.ofMinutes(15));
         historyManager.add(lastTask);
         Assertions.assertEquals(lastTask, historyManager.getHistory().get(historyManager.getHistory().size() - 1),
                 "В истории последняя добавленная задача возвращается последней в списке");
@@ -51,11 +52,11 @@ class InMemoryHistoryManagerTest {
     public void shouldRemoveWorkCorrectlyWithHistory() {
         int idAdd1 = 1;
         Task task1 = new Task(idAdd1, "TestHistory check_remove №" + 1,
-                "Test check_remove №" + 1 + " description", TaskStatus.NEW);
+                "Test check_remove №" + 1 + " description", TaskStatus.NEW, Duration.ofMinutes(15));
         historyManager.add(task1);
         int idAdd2 = 2;
         Task task2 = new Task(idAdd2, "TestHistory check_remove №" + 2,
-                "Test check_remove №" + 2 + " description", TaskStatus.NEW);
+                "Test check_remove №" + 2 + " description", TaskStatus.NEW, Duration.ofMinutes(15));
         historyManager.add(task2);
 
 
@@ -82,7 +83,7 @@ class InMemoryHistoryManagerTest {
 
         int idAdd3 = 3;
         Task task3 = new Task(idAdd3, "TestHistory check_remove №" + 3,
-                "Test check_remove №" + 3 + " description", TaskStatus.NEW);
+                "Test check_remove №" + 3 + " description", TaskStatus.NEW, Duration.ofMinutes(30));
         //проверка удаления из начала истории
         historyManager.add(task1);
         historyManager.add(task2);
@@ -124,6 +125,21 @@ class InMemoryHistoryManagerTest {
                         String.format(
                                 "В начале истории должна остаться задача задача с id = %d, заканчиваться задачей с id = %d",
                                 idAdd1, idAdd2));
+
+    }
+
+    /**
+     * Не должно быть дублирования задач в истории
+     */
+    @Test
+    void shouldBeNoDuplicatesWhenTaskAddedToHistorySeveralTimes() {
+        int idAdd1 = 1;
+        Task task1 = new Task(idAdd1, "TestHistory check_remove №" + 1,
+                "Test check_remove №" + 1 + " description", TaskStatus.NEW, Duration.ofMinutes(15));
+        historyManager.add(task1);
+        historyManager.add(task1);
+
+        Assertions.assertEquals(1, historyManager.getHistory().size(), "В истории не должно быть дублей задач");
 
     }
 

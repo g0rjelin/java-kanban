@@ -50,4 +50,6 @@ public interface TaskManager {
     HistoryManager getHistoryManager();
 
     List<Task> getHistory();
+
+    ArrayList<Task> getPrioritizedTasks();
 }

@@ -1,5 +1,7 @@
 package taskmodel;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Task {
@@ -8,30 +10,57 @@ public class Task {
     private String name; //Название, кратко описывающее суть задачи (например, «Переезд»).
     private String description; //Описание, в котором раскрываются детали.
     private TaskStatus status; //Статус
+    private Duration duration; //Продолжительность задачи
+    private LocalDateTime startTime; //дата и время планируемого начала задачи
 
-
-    //конструктор для использования в классе-наследнике (Epic)
-    protected Task(Integer id, String name, String description) {
-        this(name, description);
+    //конструктор для использования в классе-наследнике (Epic) #1
+    protected Task(Integer id, String name, String description, Duration duration) {
+        this(name, description, duration);
         this.id = id;
     }
 
-    //конструктор для задачи, уже заведенной в менеджер (обновление, удаление)
-    public Task(Integer id, String name, String description, TaskStatus status) {
-        this(id, name, description);
+    //конструктор для задачи, уже заведенной в менеджер (обновление, удаление) #2
+    public Task(Integer id, String name, String description, TaskStatus status, Duration duration) {
+        this(id, name, description, duration);
         this.status = status;
     }
 
-    //конструктор для новой задачи при создании с указанием статуса
-    public Task(String name, String description, TaskStatus status) {
+    //конструктор для новой задачи при создании с указанием статуса #3
+    public Task(String name, String description, TaskStatus status, Duration duration) {
         this.name = name;
         this.description = description;
         this.status = status;
+        this.duration = duration;
     }
 
-    //конструктор для новой задачи при создании без указания статуса
-    public Task(String name, String description) {
-        this(name,description,TaskStatus.NEW);
+    //конструктор для новой задачи при создании без указания статуса #4
+    public Task(String name, String description, Duration duration) {
+        this(name,description,TaskStatus.NEW, duration);
+    }
+
+    //набор конструкторов в случае указания даты начала задачи
+    //#1
+    protected Task(Integer id, String name, String description, Duration duration, LocalDateTime startTime) {
+        this(id, name, description, duration);
+        this.startTime = startTime;
+    }
+
+    //#2
+    public Task(Integer id, String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
+        this(id, name, description, status, duration);
+        this.startTime = startTime;
+    }
+
+    //#3
+    public Task(String name, String description, TaskStatus status, Duration duration, LocalDateTime startTime) {
+        this(name, description, status, duration);
+        this.startTime = startTime;
+    }
+
+    //#4
+    public Task(String name, String description, Duration duration, LocalDateTime startTime) {
+        this(name, description, duration);
+        this.startTime = startTime;
     }
 
     public String getName() {
@@ -66,6 +95,26 @@ public class Task {
         this.status = status;
     }
 
+    public Duration getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Duration duration) {
+        this.duration = duration;
+    }
+
+    public LocalDateTime getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(LocalDateTime startTime) {
+        this.startTime = startTime;
+    }
+
+    public LocalDateTime getEndTime() {
+        return startTime == null ? null : startTime.plusMinutes(duration.toMinutes());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -87,6 +136,8 @@ public class Task {
                 ", description='" + description + '\'' +
                 ", id=" + id +
                 ", status=" + status +
+                ", duration=" + duration +
+                ", startTime=" + startTime +
                 '}';
     }
 

@@ -13,11 +13,13 @@ import java.io.Writer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     static final String DEFAULT_TASK_MANAGER_PATH = "resources/task_manager.csv";
-    static final String TASK_CSV_HEADER = "id,type,name,status,description,epic";
+    static final String TASK_CSV_HEADER = "id,type,name,status,description,duration,starttime,epic";
 
     private Path taskManagerPath;
 
@@ -43,24 +45,32 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
 
         try {
             List<String> taskLines = Files.readAllLines(taskManagerFile);
-            String historyString = taskLines.get(taskLines.size() - 1); //Files.readString(taskManagerFile);
+            String historyString = taskLines.get(taskLines.size() - 1);
             for (int i = 1; i < taskLines.size() - 2; i++) {
                 Task task = FileBackedUtils.fromString(taskLines.get(i));
                 String[] taskLineValues = taskLines.get(i).split(",");
                 switch (TaskType.valueOf(taskLineValues[1])) {
                     case TASK:
                         fileBackedTaskManager.tasks.put(task.getId(), task);
+                        if (task.getStartTime() != null) {
+                            fileBackedTaskManager.prioritizedTasks.add(task);
+                        }
                         break;
                     case EPIC:
                         fileBackedTaskManager.epics.put(task.getId(), (Epic) task);
                         break;
                     case SUBTASK:
                         fileBackedTaskManager.subtasks.put(task.getId(), (Subtask) task);
+                        if (task.getStartTime() != null) {
+                            fileBackedTaskManager.prioritizedTasks.add(task);
+                        }
                         break;
                     default:
                         throw new ManagerSaveException("Ошибка загрузки менеджера задач");
                 }
+                fileBackedTaskManager.getIdSeq(); //прокрутка счетчика
             }
+
             //восстановление информации о списке id подзадач в эпике
             for (Subtask subtask : fileBackedTaskManager.subtasks.values()) {
                 Epic epic = fileBackedTaskManager.epics.get(subtask.getIdEpic());
@@ -90,18 +100,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     public static void main(String[] args) {
         //1. Заведите несколько разных задач, эпиков и подзадач.
         FileBackedTaskManager taskManager = new FileBackedTaskManager(Managers.getDefaultHistory());
-        Task task1 = new Task("Первая задача", "Пример запланированной задачи");
+        Task task1 =
+                new Task("Первая задача", "Пример запланированной задачи", Duration.ofMinutes(15), LocalDateTime.now());
         Integer idTask1 = taskManager.addTask(task1);
-        Task task2 = new Task("Вторая задача", "Пример задачи в работе", TaskStatus.IN_PROGRESS);
+        Task task2 =
+                new Task("Вторая задача", "Пример задачи в работе", TaskStatus.IN_PROGRESS, Duration.ofMinutes(15));
         Integer idTask2 = taskManager.addTask(task2);
         Epic epic1 = new Epic("Первый эпик", "Первое эпичное описание");
         Integer idEpic1 = taskManager.addEpic(epic1);
 
-        Subtask subtask1 = new Subtask("Первая подзадачка", "Запланированная подзадача", TaskStatus.DONE, idEpic1);
+        Subtask subtask1 =
+                new Subtask("Первая подзадачка", "Запланированная подзадача", TaskStatus.DONE, Duration.ofMinutes(15),
+                        idEpic1);
         Integer idSubtask1 = taskManager.addSubtask(subtask1);
-        Subtask subtask2 = new Subtask("Вторая подзадачка", "Подзадача в работе", idEpic1);
+        Subtask subtask2 = new Subtask("Вторая подзадачка", "Подзадача в работе", Duration.ofMinutes(15), idEpic1);
         Integer idSubtask2 = taskManager.addSubtask(subtask2);
-        Subtask subtask3 = new Subtask("Третья подзадачка", "Подзадача в работе", idEpic1);
+        Subtask subtask3 = new Subtask("Третья подзадачка", "Подзадача в работе", Duration.ofMinutes(15), idEpic1);
         Integer idSubtask3 = taskManager.addSubtask(subtask3);
 
         Epic epic2 = new Epic("Второй эпик", "Второе эпичное описание");
