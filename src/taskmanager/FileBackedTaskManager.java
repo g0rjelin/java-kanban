@@ -97,7 +97,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     /**
      * Реализация пользовательского сценария
      */
-    public static void main(String[] args) {
+    public static void main(String[] args) throws NotFoundException {
         //1. Заведите несколько разных задач, эпиков и подзадач.
         FileBackedTaskManager taskManager = new FileBackedTaskManager(Managers.getDefaultHistory());
         Task task1 =
@@ -157,21 +157,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Task getTaskById(Integer id) {
+    public Task getTaskById(Integer id) throws NotFoundException {
         Task task = super.getTaskById(id);
         save();
         return task;
     }
 
     @Override
-    public Epic getEpicById(Integer id) {
+    public Epic getEpicById(Integer id) throws NotFoundException {
         Epic epic = super.getEpicById(id);
         save();
         return epic;
     }
 
     @Override
-    public Subtask getSubtaskById(Integer id) {
+    public Subtask getSubtaskById(Integer id) throws NotFoundException {
         Subtask subtask = super.getSubtaskById(id);
         save();
         return subtask;
@@ -199,21 +199,21 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     @Override
-    public Integer updateTask(Task updTask) {
+    public Integer updateTask(Task updTask) throws NotFoundException {
         Integer idTask = super.updateTask(updTask);
         save();
         return idTask;
     }
 
     @Override
-    public Integer updateEpic(Epic updEpic) {
+    public Integer updateEpic(Epic updEpic) throws NotFoundException {
         Integer idEpic = super.updateEpic(updEpic);
         save();
         return idEpic;
     }
 
     @Override
-    public Integer updateSubtask(Subtask updSubtask) {
+    public Integer updateSubtask(Subtask updSubtask) throws NotFoundException {
         Integer idSubtask = super.updateSubtask(updSubtask);
         save();
         return idSubtask;

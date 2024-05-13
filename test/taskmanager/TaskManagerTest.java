@@ -29,7 +29,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager = createTaskManager();
         task = new Task("Test TaskManager task",
                 "Test TaskManager task description",
-                TaskStatus.NEW, Duration.ofMinutes(15), LocalDateTime.of(2024, 02, 24, 17, 05, 30));
+                TaskStatus.NEW, Duration.ofMinutes(15), LocalDateTime.of(2024, 2, 24, 17, 5, 30));
         epic = new Epic("Test TaskManager epic",
                 "Test TaskManager epic description");
     }
@@ -38,7 +38,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * проверка работы TaskManager: добавление задачи
      */
     @Test
-    public void addNewTask() {
+    public void addNewTask() throws NotFoundException {
         final int taskId = taskManager.addTask(task);
 
         final Task savedTask = taskManager.getTaskById(taskId);
@@ -87,7 +87,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * проверка неизменности задачи (по всем полям) при добавлении задачи в менеджер
      */
     @Test
-    public void shouldTaskFieldsNotBeChangedWhenAddedToTaskManager() {
+    public void shouldTaskFieldsNotBeChangedWhenAddedToTaskManager() throws NotFoundException {
         Task task = new Task("Test task to be added to manager", "Test task to be added to manager description",
                 TaskStatus.NEW, Duration.ofMinutes(15));
         String nameBeforeAdd = task.getName();
@@ -108,7 +108,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * проверка отсутствия конфликта между задачи с заданным id и сгенерированным id внутри менеджера
      */
     @Test
-    public void shouldNotConflictBetweenTaskWithSetIdAndGeneratedId() {
+    public void shouldNotConflictBetweenTaskWithSetIdAndGeneratedId() throws NotFoundException {
         int taskGenId = taskManager.addTask(task);
         String nameBeforeAdd = task.getName();
         String descriptionBeforeAdd = task.getDescription();
@@ -136,7 +136,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * проверка работы TaskManager: добавление эпика
      */
     @Test
-    public void addNewEpic() {
+    public void addNewEpic() throws NotFoundException {
         final int epicId = taskManager.addEpic(epic);
 
         final Task savedEpic = taskManager.getEpicById(epicId);
@@ -203,7 +203,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * проверка отсутствия конфликта между эпиком с заданным id и сгенерированным id внутри менеджера
      */
     @Test
-    public void shouldNotConflictBetweenEpicWithSetIdAndGeneratedId() {
+    public void shouldNotConflictBetweenEpicWithSetIdAndGeneratedId() throws NotFoundException {
         int epicGenId = taskManager.addEpic(epic);
         String nameBeforeAdd = epic.getName();
         String descriptionBeforeAdd = epic.getDescription();
@@ -337,10 +337,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         Epic epic = new Epic("Эпик: тест добавления в себя в виде подзадачи",
                 "Описание: тест добавления в себя в виде подзадачи");
         taskManager.addEpic(epic);
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            taskManager.addSubtask(taskManager.getSubtaskById(epic.getId()));
-        });
-
+        Assertions.assertThrows(NotFoundException.class,
+                () -> taskManager.addSubtask(taskManager.getSubtaskById(epic.getId())));
     }
 
     /**
@@ -360,9 +358,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 "Описание: Подзадача для проверки указания ее своим эпиком при добавлении", TaskStatus.NEW,
                 Duration.ofMinutes(30), subtaskId);
 
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            taskManager.addSubtask(newSubtask);
-        }, "При добавлении подзадача не должна быть указана в качестве эпика другой подзадачи");
+        Assertions.assertThrows(NotFoundException.class, () -> taskManager.addSubtask(newSubtask),
+                "При добавлении подзадача не должна быть указана в качестве эпика другой подзадачи");
 
     }
 
@@ -383,9 +380,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 "Описание: Подзадача для проверки указания ее своим эпиком при обновлении", TaskStatus.NEW,
                 Duration.ofMinutes(30), subtaskId);
 
-        Assertions.assertThrows(NullPointerException.class, () -> {
-            taskManager.updateSubtask(newSubtask);
-        }, "При обновлении подзадача не должна быть указана в качестве эпика другой подзадачи");
+        Assertions.assertThrows(NullPointerException.class, () -> taskManager.updateSubtask(newSubtask),
+                "При обновлении подзадача не должна быть указана в качестве эпика другой подзадачи");
 
     }
 
@@ -443,7 +439,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * задачи, добавляемые в HistoryManager, сохраняют предыдущую версию задачи и её данных
      */
     @Test
-    public void shouldPreserveTaskPrevVersionInHistory() {
+    public void shouldPreserveTaskPrevVersionInHistory() throws NotFoundException {
         String initName = "Test task Version 1";
         String initDescription = "Test task Version 1 Description";
         TaskStatus initTaskStatus = TaskStatus.NEW;
@@ -505,7 +501,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * эпики, добавляемые в HistoryManager, сохраняют предыдущую версию эпика и её данных
      */
     @Test
-    public void shouldPreserveEpicPrevVersionInHistory() {
+    public void shouldPreserveEpicPrevVersionInHistory() throws NotFoundException {
         String initName = "Test epic Version 1";
         String initDescription = "Test epic Version 1 Description";
         Epic epic = new Epic(initName, initDescription);
@@ -641,7 +637,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * с разной последовательностью обращения к задачам
      */
     @Test
-    public void shouldLinkLastWorkCorrectly() {
+    public void shouldLinkLastWorkCorrectly() throws NotFoundException {
         //подготовка данных
         Task task1 = new Task(1, "TestHistory check linkLast №" + 1,
                 "TestHistory check linkLast №" + 1 + " description", TaskStatus.NEW, Duration.ofMinutes(10));
@@ -706,7 +702,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addSubtask(subtask2);
         taskManager.addSubtask(subtask3);
 
-        Assertions.assertEquals(TaskStatus.NEW, epic.getStatus(), "У эпика со всеми подзадачами в статусе NEW должен быть статус NEW");
+        Assertions.assertEquals(TaskStatus.NEW, epic.getStatus(),
+                "У эпика со всеми подзадачами в статусе NEW должен быть статус NEW");
 
         //Все подзадачи со статусом DONE
         subtask1 =
@@ -723,7 +720,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addSubtask(subtask2);
         taskManager.addSubtask(subtask3);
 
-        Assertions.assertEquals(TaskStatus.DONE, epic.getStatus(), "У эпика со всеми подзадачами в статусе DONE должен быть статус DONE");
+        Assertions.assertEquals(TaskStatus.DONE, epic.getStatus(),
+                "У эпика со всеми подзадачами в статусе DONE должен быть статус DONE");
 
         //Все подзадачи со статусами NEW и DONE
         subtask1 =
@@ -740,7 +738,8 @@ abstract class TaskManagerTest<T extends TaskManager> {
         taskManager.addSubtask(subtask2);
         taskManager.addSubtask(subtask3);
 
-        Assertions.assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(), "У эпика с подзадачами в статусах NEW и DONE должен быть статус IN_PROGRESS");
+        Assertions.assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(),
+                "У эпика с подзадачами в статусах NEW и DONE должен быть статус IN_PROGRESS");
 
         //Все подзадачи со статусами NEW и DONE
         subtask1 =
@@ -750,43 +749,47 @@ abstract class TaskManagerTest<T extends TaskManager> {
                 new Subtask("Test subtask2", "Test subtask2 Description", TaskStatus.NEW, Duration.ofMinutes(15),
                         epicId);
         subtask3 =
-                new Subtask("Test subtask3", "Test subtask3 Description", TaskStatus.IN_PROGRESS, Duration.ofMinutes(15),
+                new Subtask("Test subtask3", "Test subtask3 Description", TaskStatus.IN_PROGRESS,
+                        Duration.ofMinutes(15),
                         epicId);
         taskManager.removeAllSubtasks();
         taskManager.addSubtask(subtask1);
         taskManager.addSubtask(subtask2);
         taskManager.addSubtask(subtask3);
 
-        Assertions.assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(), "У эпика с подзадачами в статусе IN_PROGRESS должен быть статус IN_PROGRESS");
+        Assertions.assertEquals(TaskStatus.IN_PROGRESS, epic.getStatus(),
+                "У эпика с подзадачами в статусе IN_PROGRESS должен быть статус IN_PROGRESS");
     }
 
     /**
-     *  Тест на корректность расчёта пересечения интервалов
+     * Тест на корректность расчёта пересечения интервалов
      */
     @Test
     void shouldCorrectlyValidateIntersectionOfIntervals() {
         //кейс 1: не пересекаются
         Task task1 = new Task(1, "Test intersection 1",
                 "Test intersection 1 description", TaskStatus.NEW, Duration.ofDays(3),
-                LocalDateTime.of(2024,1,1,0,0,0));
+                LocalDateTime.of(2024, 1, 1, 0, 0, 0));
         Task task2 = new Task(2, "Test intersection 2",
                 "Test intersection 2 description", TaskStatus.NEW, Duration.ofDays(1),
-                LocalDateTime.of(2024,1,6,0,0,0));
+                LocalDateTime.of(2024, 1, 6, 0, 0, 0));
         taskManager.removeAllTasks();
         taskManager.addTask(task1);
         taskManager.addTask(task2);
-        Assertions.assertEquals(2, taskManager.getTasksList().size(), "Если интервалы задач не пересекаются, то задача должна добавиться");
+        Assertions.assertEquals(2, taskManager.getTasksList().size(),
+                "Если интервалы задач не пересекаются, то задача должна добавиться");
 
         //кейс 2: пересекаются
         task1 = new Task(1, "Test intersection 1",
                 "Test intersection 1 description", TaskStatus.NEW, Duration.ofDays(3),
-                LocalDateTime.of(2024,1,1,0,0,0));
+                LocalDateTime.of(2024, 1, 1, 0, 0, 0));
         task2 = new Task(2, "Test intersection 2",
                 "Test intersection 2 description", TaskStatus.NEW, Duration.ofDays(1),
-                LocalDateTime.of(2024,1,2,0,0,0));
+                LocalDateTime.of(2024, 1, 2, 0, 0, 0));
         taskManager.removeAllTasks();
         taskManager.addTask(task1);
         Integer idAddedTask = taskManager.addTask(task2);
-        Assertions.assertTrue(1 == taskManager.getTasksList().size() && idAddedTask == 0, "Если интервалы задач пересекаются, то задача не должна добавиться");
+        Assertions.assertTrue(1 == taskManager.getTasksList().size() && idAddedTask == 0,
+                "Если интервалы задач пересекаются, то задача не должна добавиться");
     }
 }
