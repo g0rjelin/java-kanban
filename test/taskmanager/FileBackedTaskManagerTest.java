@@ -31,7 +31,7 @@ class FileBackedTaskManagerTest extends TaskManagerTest<FileBackedTaskManager> {
     }
 
     @Test
-    void shouldCorrectlySaveAndLoadTaskManager() throws NotFoundException {
+    void shouldCorrectlySaveAndLoadTaskManager() {
         //наполнение задачами
         Task task1 = new Task("Первая задача", "Пример запланированной задачи", Duration.ofMinutes(50),
                 LocalDateTime.of(2024, 1, 15, 15, 0, 0));

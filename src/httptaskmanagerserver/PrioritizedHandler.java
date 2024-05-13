@@ -1,12 +1,11 @@
 package httptaskmanagerserver;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import taskmanager.TaskManager;
 
 import java.io.IOException;
 
-public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
+public class PrioritizedHandler extends BaseHttpHandler {
 
     PrioritizedHandler(TaskManager taskManager) {
         super(taskManager);
@@ -19,7 +18,7 @@ public class PrioritizedHandler extends BaseHttpHandler implements HttpHandler {
             if (httpExchange.getRequestMethod().equals("GET") && path.equals("/prioritized")) {
                 sendText(httpExchange, gson.toJson(taskManager.getPrioritizedTasks()));
             } else {
-                sendNotFound(httpExchange, "Неправильное обращение к /prioritized");
+                sendMethodNotAllowed(httpExchange, "Неправильное обращение к /prioritized");
             }
         } catch (IOException e) {
             sendInternalServerError(httpExchange);

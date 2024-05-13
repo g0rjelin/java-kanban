@@ -1,12 +1,11 @@
 package httptaskmanagerserver;
 
 import com.sun.net.httpserver.HttpExchange;
-import com.sun.net.httpserver.HttpHandler;
 import taskmanager.TaskManager;
 
 import java.io.IOException;
 
-public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
+public class HistoryHandler extends BaseHttpHandler {
 
     HistoryHandler(TaskManager taskManager) {
         super(taskManager);
@@ -19,7 +18,7 @@ public class HistoryHandler extends BaseHttpHandler implements HttpHandler {
             if (httpExchange.getRequestMethod().equals("GET") && path.equals("/history")) {
                 sendText(httpExchange, gson.toJson(taskManager.getHistory()));
             } else {
-                sendNotFound(httpExchange, "Неправильное обращение к /history");
+                sendMethodNotAllowed(httpExchange, "Неправильное обращение к /history");
             }
         } catch (IOException e) {
             sendInternalServerError(httpExchange);

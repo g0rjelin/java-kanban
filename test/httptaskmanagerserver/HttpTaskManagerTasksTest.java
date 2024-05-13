@@ -250,4 +250,21 @@ public class HttpTaskManagerTasksTest {
         Assertions.assertEquals(404, response.statusCode(), "Код ответа при отсутствии запрошенной задачи по Id должен быть 404");
 
     }
+
+    @Test
+    public void testTriggerMethodNotAllowed() throws IOException, InterruptedException {
+        Task task1 = new Task("Test 1 name", "Testing method not allowed",
+                TaskStatus.NEW, Duration.ofMinutes(30), LocalDateTime.of(2024, 1, 15, 12, 5, 0));
+        Integer idTask1 = taskManager.addTask(task1);
+        String taskJson = gson.toJson(task1);
+
+        //построение некорректного запроса к tasks - использование метода PUT
+        HttpClient client = HttpClient.newHttpClient();
+        URI url = URI.create("http://localhost:8080/tasks/2");
+        HttpRequest request = HttpRequest.newBuilder().uri(url).PUT(HttpRequest.BodyPublishers.ofString(taskJson)).build();
+
+        HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+        Assertions.assertEquals(405, response.statusCode(), "Код ответа при неправильном обращении к методу должен быть 405");
+
+    }
 }

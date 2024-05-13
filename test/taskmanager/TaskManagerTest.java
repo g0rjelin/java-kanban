@@ -38,7 +38,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * проверка работы TaskManager: добавление задачи
      */
     @Test
-    public void addNewTask() throws NotFoundException {
+    public void addNewTask() {
         final int taskId = taskManager.addTask(task);
 
         final Task savedTask = taskManager.getTaskById(taskId);
@@ -87,7 +87,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * проверка неизменности задачи (по всем полям) при добавлении задачи в менеджер
      */
     @Test
-    public void shouldTaskFieldsNotBeChangedWhenAddedToTaskManager() throws NotFoundException {
+    public void shouldTaskFieldsNotBeChangedWhenAddedToTaskManager() {
         Task task = new Task("Test task to be added to manager", "Test task to be added to manager description",
                 TaskStatus.NEW, Duration.ofMinutes(15));
         String nameBeforeAdd = task.getName();
@@ -108,7 +108,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * проверка отсутствия конфликта между задачи с заданным id и сгенерированным id внутри менеджера
      */
     @Test
-    public void shouldNotConflictBetweenTaskWithSetIdAndGeneratedId() throws NotFoundException {
+    public void shouldNotConflictBetweenTaskWithSetIdAndGeneratedId(){
         int taskGenId = taskManager.addTask(task);
         String nameBeforeAdd = task.getName();
         String descriptionBeforeAdd = task.getDescription();
@@ -136,7 +136,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * проверка работы TaskManager: добавление эпика
      */
     @Test
-    public void addNewEpic() throws NotFoundException {
+    public void addNewEpic() {
         final int epicId = taskManager.addEpic(epic);
 
         final Task savedEpic = taskManager.getEpicById(epicId);
@@ -203,7 +203,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * проверка отсутствия конфликта между эпиком с заданным id и сгенерированным id внутри менеджера
      */
     @Test
-    public void shouldNotConflictBetweenEpicWithSetIdAndGeneratedId() throws NotFoundException {
+    public void shouldNotConflictBetweenEpicWithSetIdAndGeneratedId() {
         int epicGenId = taskManager.addEpic(epic);
         String nameBeforeAdd = epic.getName();
         String descriptionBeforeAdd = epic.getDescription();
@@ -439,7 +439,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * задачи, добавляемые в HistoryManager, сохраняют предыдущую версию задачи и её данных
      */
     @Test
-    public void shouldPreserveTaskPrevVersionInHistory() throws NotFoundException {
+    public void shouldPreserveTaskPrevVersionInHistory() {
         String initName = "Test task Version 1";
         String initDescription = "Test task Version 1 Description";
         TaskStatus initTaskStatus = TaskStatus.NEW;
@@ -501,7 +501,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * эпики, добавляемые в HistoryManager, сохраняют предыдущую версию эпика и её данных
      */
     @Test
-    public void shouldPreserveEpicPrevVersionInHistory() throws NotFoundException {
+    public void shouldPreserveEpicPrevVersionInHistory() {
         String initName = "Test epic Version 1";
         String initDescription = "Test epic Version 1 Description";
         Epic epic = new Epic(initName, initDescription);
@@ -637,7 +637,7 @@ abstract class TaskManagerTest<T extends TaskManager> {
      * с разной последовательностью обращения к задачам
      */
     @Test
-    public void shouldLinkLastWorkCorrectly() throws NotFoundException {
+    public void shouldLinkLastWorkCorrectly() {
         //подготовка данных
         Task task1 = new Task(1, "TestHistory check linkLast №" + 1,
                 "TestHistory check linkLast №" + 1 + " description", TaskStatus.NEW, Duration.ofMinutes(10));

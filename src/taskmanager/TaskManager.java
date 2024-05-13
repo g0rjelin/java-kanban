@@ -21,11 +21,11 @@ public interface TaskManager {
 
     void removeAllSubtasks();
 
-    Task getTaskById(Integer id) throws NotFoundException;
+    Task getTaskById(Integer id);
 
-    Epic getEpicById(Integer id) throws NotFoundException;
+    Epic getEpicById(Integer id);
 
-    Subtask getSubtaskById(Integer id) throws NotFoundException;
+    Subtask getSubtaskById(Integer id);
 
     Integer addTask(Task newTask);
 
@@ -33,11 +33,11 @@ public interface TaskManager {
 
     Integer addSubtask(Subtask newSubtask);
 
-    Integer updateTask(Task updTask) throws NotFoundException;
+    Integer updateTask(Task updTask);
 
-    Integer updateEpic(Epic updEpic) throws NotFoundException;
+    Integer updateEpic(Epic updEpic);
 
-    Integer updateSubtask(Subtask updSubtask) throws NotFoundException;
+    Integer updateSubtask(Subtask updSubtask);
 
     void deleteTaskById(Integer id);
 
@@ -45,7 +45,7 @@ public interface TaskManager {
 
     void deleteSubtaskById(Integer id);
 
-    ArrayList<Subtask> getSubtasksListByEpic(Epic epic) throws NotFoundException;
+    ArrayList<Subtask> getSubtasksListByEpic(Epic epic);
 
     HistoryManager getHistoryManager();
 
