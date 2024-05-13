@@ -50,23 +50,20 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 Task task = FileBackedUtils.fromString(taskLines.get(i));
                 String[] taskLineValues = taskLines.get(i).split(",");
                 switch (TaskType.valueOf(taskLineValues[1])) {
-                    case TASK:
+                    case TASK -> {
                         fileBackedTaskManager.tasks.put(task.getId(), task);
                         if (task.getStartTime() != null) {
                             fileBackedTaskManager.prioritizedTasks.add(task);
                         }
-                        break;
-                    case EPIC:
-                        fileBackedTaskManager.epics.put(task.getId(), (Epic) task);
-                        break;
-                    case SUBTASK:
+                    }
+                    case EPIC -> fileBackedTaskManager.epics.put(task.getId(), (Epic) task);
+                    case SUBTASK -> {
                         fileBackedTaskManager.subtasks.put(task.getId(), (Subtask) task);
                         if (task.getStartTime() != null) {
                             fileBackedTaskManager.prioritizedTasks.add(task);
                         }
-                        break;
-                    default:
-                        throw new ManagerSaveException("Ошибка загрузки менеджера задач");
+                    }
+                    default -> throw new ManagerSaveException("Ошибка загрузки менеджера задач");
                 }
                 fileBackedTaskManager.getIdSeq(); //прокрутка счетчика
             }
